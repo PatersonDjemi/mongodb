@@ -10,6 +10,7 @@ var User = require('./models/user');
 
 
 var app = express();
+var port = process.env.PORT || 3000;
 
 
 app.use(bodyParser.json()); // take a middelware and make it available to express
@@ -57,8 +58,8 @@ app.get('/todos/:id', (req, res) => {
 
 });
 
-app.listen(3000, (req, res) =>  {
-   console.log("server is now available on port 3000");
+app.listen(port, (req, res) =>  {
+   console.log(`server is now available on port ${port}`);
 });
 
 
