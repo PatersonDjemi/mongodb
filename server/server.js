@@ -30,6 +30,14 @@ app.post('/todos', (req, res) => {
 
 });
 
+app.get('/todos', (req, res) => {
+   Todo.find().then(todos => {
+       res.status(200).send({todos}); // en mettant todos en tant que objet, ca fait que notre response todos sera contenu ds un objet, ds le cas contraire on obtient un array à la fin
+    }).catch(err => {
+        res.status(400).send(e);
+});
+});
+
 
 app.listen(3000, (req, res) =>  {
    console.log("server is now available on port 3000");
