@@ -115,6 +115,39 @@ app.patch('/todos/:id', (req, res) => {
 });
 
 
+//post users
+app.post('/users', (req, res) => {
+
+    let body = _.pick(req.body, ["email", "password"]);
+
+    /*
+    let user = new User({
+        email: body.email,
+        password: body.password
+    });
+    */
+    let user = new User(body);
+
+    user.save().then(() => {
+
+        console.log("saved user : ", user);
+        return user.generateAuthToken();
+
+        // res.status(200).send(user);
+
+    }).then(token => {
+        //x-auth pour les headers personnalisés
+        res.header('x-auth', token).send(user);
+
+    }).catch(err => {
+
+        console.log("unable to save the user");
+        res.status(400).send(err);
+    });
+
+});
+
+
 app.listen(port, (req, res) =>  {
     console.log(`server is now available on port ${port}`);
 });
