@@ -2,6 +2,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var {ObjectID} = require("mongodb");
+var _ = require('lodash');
 
 //local imports
 var {mongoose} = require('./db/mongoose');
@@ -58,10 +59,6 @@ app.get('/todos/:id', (req, res) => {
 
 });
 
-app.listen(port, (req, res) =>  {
-   console.log(`server is now available on port ${port}`);
-});
-
 
 app.delete('/todos/:id', (req, res) => {
     var id = req.params.id;
@@ -82,14 +79,45 @@ app.delete('/todos/:id', (req, res) => {
 
     }).catch(err => res.status(404).send(""));
 
+});
+
+app.patch('/todos/:id', (req, res) => {
+
+   var id = req.params.id; // pour l url
+
+   var body = _.pick(req.body, ["text", "completed"]); // pick prend un objet avec des propriétés et retourne un objet avec les propriétes qu on veut
+    console.log(body);
+    if (!ObjectID.isValid(id)) {
+        console.log("this id is not valid");
+        return res.status(404).send("");
+    }
+
+
+    var bool= _.isBoolean(body.completed);
+
+
+    if ( bool && body.completed) {
+
+        body.completedAt = new Date().getTime();
+    } else {
+
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then(todo => {
+        if (!todo) {
+            return res.status(404).send("");
+        }
+         res.status(200).send({todo});
+    }).catch(err => res.status(400).send(""));
 
 });
 
 
-
-
-
-
+app.listen(port, (req, res) =>  {
+    console.log(`server is now available on port ${port}`);
+});
 
 
 
