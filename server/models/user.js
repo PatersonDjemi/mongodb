@@ -3,6 +3,7 @@ var { Schema } = mongoose;
 const validator = require('validator');
 var jwt = require("jsonwebtoken");
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 
 var mySchema = new Schema({
@@ -56,6 +57,48 @@ mySchema.methods.generateAuthToken = function () {
 
     return user.save().then(() => token);
 }
+
+mySchema.statics.findByToken = function (token) {
+    var User = this; // comme on use static on travaille avec le construction (pas l instance)
+    var decoded;
+    var secret = "mysecret";
+
+    try {
+        decoded = jwt.verify(token, secret);
+    } catch (e) {
+        console.log(e);
+        return Promise.reject();
+    }
+
+    return User.findOne({
+        '_id': decoded._id,
+        "tokens.token": token,
+        "tokens.access": "auth"
+    });
+}
+
+mySchema.pre('save', function (next) {
+    var user = this;
+
+    if(user.isModified('password')) {
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(user.password, salt, (err, hashPassword) => {
+            try {
+                user.password = hashPassword;
+            } catch (err) {
+
+                console.log(err)
+        }
+
+            next();
+        });
+      });
+
+    } else {
+
+        next();
+    }
+})
 
 var User = mongoose.model("User", mySchema);
 
