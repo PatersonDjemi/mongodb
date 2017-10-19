@@ -100,6 +100,19 @@ mySchema.pre('save', function (next) {
     }
 });
 
+mySchema.methods.removeToken = function (token) {
+    var user = this;
+
+    return user.update({
+        $pull: {
+            tokens: {
+                token: token
+            }
+        }
+    });
+}
+
+
 mySchema.statics.findByCredentials =  function (email, password) {
     var User = this;
 
